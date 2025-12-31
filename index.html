@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>정아인의 하늘계단 수학모험</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-icon">🐰</div>
+        <div class="brand-text">
+          <div class="brand-title">정아인의 하늘계단 수학모험</div>
+          <div class="brand-sub">선생님 괴물 20마리를 이기고 하늘로 올라가요!</div>
+        </div>
+      </div>
+
+      <div class="hud">
+        <div class="pill">
+          <span class="pill-label">단계</span>
+          <span id="hudStage">0</span><span class="pill-dim">/20</span>
+        </div>
+        <div class="pill">
+          <span class="pill-label">정답</span>
+          <span id="hudCorrect">0</span>
+        </div>
+        <div class="pill pill-time" id="hudTimePill">
+          <span class="pill-label">시간</span>
+          <span id="hudTime">-</span><span class="pill-dim">s</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="layout">
+      <!-- LEFT: SCENE -->
+      <section class="scene" aria-label="하늘계단 배경">
+        <div class="sky"></div>
+        <div class="cloud c1"></div>
+        <div class="cloud c2"></div>
+        <div class="cloud c3"></div>
+
+        <div class="far-mountains"></div>
+        <div class="waterfall" aria-hidden="true">
+          <div class="water"></div>
+          <div class="spray"></div>
+        </div>
+
+        <div class="giant-tree" aria-hidden="true">
+          <div class="crown"></div>
+          <div class="trunk"></div>
+          <div class="vines"></div>
+          <div class="stairs">
+            <div class="stair s1"></div><div class="stair s2"></div><div class="stair s3"></div>
+            <div class="stair s4"></div><div class="stair s5"></div><div class="stair s6"></div>
+            <div class="stair s7"></div><div class="stair s8"></div><div class="stair s9"></div>
+            <div class="stair s10"></div><div class="stair s11"></div><div class="stair s12"></div>
+          </div>
+        </div>
+
+        <!-- Bunny -->
+        <div class="bunny" id="bunny" role="img" aria-label="토끼">
+          <div class="b-ears">
+            <div class="ear left"></div>
+            <div class="ear right"></div>
+          </div>
+          <div class="b-head">
+            <div class="eye left"></div>
+            <div class="eye right"></div>
+            <div class="nose"></div>
+            <div class="mouth"></div>
+            <div class="cheek left"></div>
+            <div class="cheek right"></div>
+          </div>
+          <div class="b-body"></div>
+          <div class="b-paw left"></div>
+          <div class="b-paw right"></div>
+          <div class="b-foot left"></div>
+          <div class="b-foot right"></div>
+        </div>
+
+        <!-- Overlay: toast + sparkles + stars -->
+        <div class="overlay-layer" id="overlayLayer" aria-hidden="true"></div>
+
+        <!-- Start Panel -->
+        <div class="start-panel" id="startPanel">
+          <div class="card">
+            <div class="card-title">게임 시작!</div>
+            <div class="card-text">
+              🧙‍♂️ 선생님 괴물이 더하기 문제를 내요.<br/>
+              ⏱️ 20초 안에 정답을 제출하면 토끼가 더 올라가요!<br/>
+              ❌ 오답/시간초과면 “앗!”… 토끼가 사라지고 게임 종료!
+            </div>
+            <button class="btn primary big" id="btnStart">시작하기</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT: UI PANELS -->
+      <aside class="side" aria-label="게임 정보 패널">
+        <!-- Monster -->
+        <section class="panel panel-monster">
+          <div class="panel-head">
+            <div class="panel-title">☁️ 하늘계단 선생님</div>
+            <div class="panel-badge" id="monsterBadge">대기 중</div>
+          </div>
+          <div class="monster-row">
+            <div class="monster-face" id="monsterFace" aria-hidden="true">
+              <div class="horn h1"></div><div class="horn h2"></div>
+              <div class="m-eye e1"></div><div class="m-eye e2"></div>
+              <div class="m-mouth"></div>
+              <div class="m-bow"></div>
+            </div>
+            <div class="monster-talk">
+              <div class="monster-name" id="monsterName">선생님 괴물</div>
+              <div class="monster-say" id="monsterSay">시작 버튼을 눌러줘!</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Quiz Box -->
+        <section class="panel panel-quiz">
+          <div class="panel-head">
+            <div class="panel-title">📘 Quiz Box</div>
+            <div class="timer-chip">
+              ⏱ <span id="timeLeft">-</span>s
+            </div>
+          </div>
+
+          <div class="quiz-stage">
+            <span class="chip" id="stageChip">0/20</span>
+            <span class="chip chip-warn" id="dingChip">준비</span>
+          </div>
+
+          <div class="question" id="questionText">시작하기를 누르면 문제가 나와요!</div>
+
+          <form class="answer" id="answerForm" autocomplete="off">
+            <input id="answerInput" type="number" inputmode="numeric" placeholder="정답 입력" required />
+            <button class="btn primary" type="submit">제출</button>
+          </form>
+
+          <div class="helper" id="helperText">힌트: 천천히 생각해도 괜찮아요 🙂</div>
+        </section>
+
+        <!-- Final stats -->
+        <section class="panel panel-stats">
+          <div class="panel-head">
+            <div class="panel-title">📊 Final stats</div>
+            <div class="panel-badge" id="finalBadge">진행 중</div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat">
+              <div class="stat-label">맞힌 문제</div>
+              <div class="stat-value"><span id="statCorrect">0</span> / 20</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">점수(100점)</div>
+              <div class="stat-value"><span id="statScore">0</span> 점</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">보상</div>
+              <div class="stat-value" id="statReward">없음</div>
+            </div>
+          </div>
+
+          <div class="end-actions">
+            <button class="btn" id="btnRestart">다시하기</button>
+          </div>
+        </section>
+
+        <div class="legal">
+          <span>✅ 광고/로그인/개인정보 없음</span>
+          <span>📱 GitHub Pages로 바로 실행</span>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <script src="./script.js"></script>
+</body>
+</html>
