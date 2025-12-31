@@ -8,10 +8,8 @@
         @import url('https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&family=Nanum+Gothic:wght@700;800&display=swap');
 
         :root {
-            /* 4. 하늘 그라데이션 색상 */
             --sky-top: #4facfe;
             --sky-bottom: #a1eafb;
-            /* 3. 나무 그라데이션 색상 */
             --tree-deep: #3e2723;
             --tree-mid: #5d4037;
             --tree-light: #795548;
@@ -19,7 +17,6 @@
 
         body { margin: 0; overflow: hidden; font-family: 'Nanum Gothic', sans-serif; background: var(--sky-bottom); user-select: none; touch-action: manipulation; }
 
-        /* 4. 하늘처럼 보이는 배경과 구름 */
         #game-container { 
             position: relative; width: 100vw; height: 100vh; 
             background: linear-gradient(to bottom, var(--sky-top) 0%, var(--sky-bottom) 100%); 
@@ -37,7 +34,6 @@
 
         #game-world { position: relative; width: 100vw; height: 100vh; transition: transform 0.8s ease-in-out; }
 
-        /* 3. 진짜 나무처럼 보이는 그라데이션 나무 */
         .giant-tree { 
             position: absolute; left: 50%; bottom: -2000px; width: 320px; height: 6000px; 
             background: linear-gradient(90deg, var(--tree-deep) 0%, var(--tree-mid) 25%, var(--tree-light) 50%, var(--tree-mid) 75%, var(--tree-deep) 100%);
@@ -52,22 +48,25 @@
             box-shadow: 0 5px 10px rgba(0,0,0,0.2); 
         }
 
-        /* 캐릭터 및 말풍선 그룹 */
-        #rabbit-group { position: absolute; z-index: 10; transition: all 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; flex-direction: column; align-items: center; }
-        #rabbit { font-size: 65px; margin-top: -10px; }
+        /* 1. 말풍선 위치 수정: 레이아웃에 영향을 주지 않도록 absolute 설정 */
+        #rabbit-group { position: absolute; z-index: 10; transition: all 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        #rabbit { font-size: 65px; }
 
         #rabbit-bubble {
+            position: absolute; /* 절대 위치로 설정하여 토끼를 밀어내지 않음 */
+            left: 80px; /* 토끼 오른쪽 옆으로 배치 */
+            top: -20px;
             background: #fff; border: 3px solid #ff80ab; padding: 5px 12px;
             border-radius: 15px; font-family: 'Nanum Pen Script', cursive; font-size: 24px; font-weight: 800;
             color: #d81b60; white-space: nowrap; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            display: none; position: relative; margin-bottom: 5px;
+            display: none; z-index: 11;
         }
-        #rabbit-bubble::after { content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); border-width: 10px 10px 0; border-style: solid; border-color: #ff80ab transparent; }
+        #rabbit-bubble::after { 
+            content: ''; position: absolute; left: -10px; top: 20px; 
+            border-width: 8px 10px 8px 0; border-style: solid; 
+            border-color: transparent #ff80ab transparent transparent; 
+        }
 
-        /* 2. 할아버지 캐릭터 삭제 (Monster 요소 제거 또는 미표시) */
-        #monster { display: none !important; }
-
-        /* 팝업 UI */
         #ui-layer { position: absolute; top: 10px; left: 0; width: 100%; pointer-events: none; z-index: 100; display: flex; flex-direction: column; align-items: center; }
         #quiz-box {
             pointer-events: auto; display: none; background: rgba(255, 255, 255, 0.98);
@@ -89,8 +88,6 @@
 <div id="game-container">
     <div class="cloud" style="top: 10%; width: 120px; height: 40px; animation-delay: 0s;"></div>
     <div class="cloud" style="top: 30%; width: 180px; height: 60px; animation-delay: -5s;"></div>
-    <div class="cloud" style="top: 50%; width: 140px; height: 50px; animation-delay: -10s;"></div>
-
     <div id="game-world">
         <div class="giant-tree"></div>
         <div id="stair-container"></div>
@@ -98,7 +95,7 @@
             <div id="rabbit-bubble"></div>
             <div id="rabbit">🐰</div>
         </div>
-        </div>
+    </div>
 
     <div id="ui-layer">
         <div id="quiz-box">
@@ -118,12 +115,16 @@
 </div>
 
 <script>
-    // 1. 귀여운 소리 설정
     const audioBgm = new Audio('https://assets.mixkit.co/active_storage/sfx/2033/2033-preview.mp3'); 
     audioBgm.loop = true; audioBgm.volume = 0.2;
 
-    const audioCorrect = new Audio('https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3'); // 정답 소리
-    const audioWin = new Audio('https://assets.mixkit.co/active_storage/sfx/1432/1432-preview.mp3'); // 20문제 완주 소리
+    // 2. 정답 소리 다양화 (무작위로 귀여운 소리 출력)
+    const successSounds = [
+        new Audio('https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3'),
+        new Audio('https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3'),
+        new Audio('https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3')
+    ];
+    const audioWin = new Audio('https://assets.mixkit.co/active_storage/sfx/1432/1432-preview.mp3');
 
     const gameWorld = document.getElementById('game-world');
     const rabbitGroup = document.getElementById('rabbit-group');
@@ -170,7 +171,6 @@
         const y = window.innerHeight - (currentLvl * 90) - 185;
         rabbitGroup.style.left = x + 'px';
         rabbitGroup.style.top = y + 'px';
-        rabbitGroup.style.zIndex = Math.cos(angle) > 0 ? 10 : 3;
     }
 
     function showRabbitSpeech(msg) {
@@ -179,23 +179,30 @@
         setTimeout(() => rabbitBubble.style.display = 'none', 2000);
     }
 
-    // 5. 문제를 조금 더 쉽게 (한자리 수 위주)
+    // 3. 단계별 난이도 조절 (초등 1학년 수준)
     function makeQuiz() {
         let a, b;
-        if (currentLvl <= 10) {
-            a = Math.floor(Math.random() * 5) + 1; // 1~5
-            b = Math.floor(Math.random() * 4) + 1; // 1~4
+        if (currentLvl <= 5) {
+            // 1~5번: 한자리수 + 한자리수 (합 10 이하 위주)
+            a = Math.floor(Math.random() * 5) + 1;
+            b = Math.floor(Math.random() * 4) + 1;
+        } else if (currentLvl <= 10) {
+            // 6~10번: 한자리수 + 두자리수 (합 20 이하)
+            a = Math.floor(Math.random() * 9) + 1;
+            b = Math.floor(Math.random() * 10) + 10;
         } else {
-            a = Math.floor(Math.random() * 9) + 1; // 1~9
-            b = Math.floor(Math.random() * 5) + 1; // 1~5
+            // 11~20번: 두자리수 + 두자리수 (합 40 이하 쉬운 계산)
+            a = Math.floor(Math.random() * 10) + 10;
+            b = Math.floor(Math.random() * 10) + 10;
         }
         correctVal = a + b;
         questionEl.innerText = `${a} + ${b} = ?`;
         remainEl.innerText = `남은 문제: ${totalQuest - currentLvl}개`;
 
-        const options = [correctVal, correctVal + 1, correctVal + 2].sort(() => Math.random() - 0.5);
+        const options = [correctVal, correctVal + (Math.random() > 0.5 ? 1 : 2), correctVal - (Math.random() > 0.5 ? 1 : 2)].sort(() => Math.random() - 0.5);
         optionsContainer.innerHTML = '';
         options.forEach(opt => {
+            if(opt < 0) opt = correctVal + 3;
             const btn = document.createElement('button');
             btn.className = 'option-btn';
             btn.innerText = opt;
@@ -210,7 +217,7 @@
         currentLvl++;
         updateRabbitPosition();
         setTimeout(() => {
-            showRabbitSpeech(["최고야!", "화이팅!", "잘한다!"][Math.floor(Math.random()*3)]);
+            showRabbitSpeech(["정답!", "천재!", "멋져!"][Math.floor(Math.random()*3)]);
             quizBox.style.display = 'block';
             makeQuiz();
             startTimer();
@@ -234,8 +241,8 @@
         if (val === correctVal) {
             clearInterval(timer);
             score++;
-            // 1. 정답 시 귀여운 소리
-            audioCorrect.play();
+            // 2. 무작위 귀여운 소리 재생
+            successSounds[Math.floor(Math.random() * successSounds.length)].play();
             quizBox.style.display = 'none';
             setTimeout(startTurn, 500);
         } else {
@@ -250,12 +257,10 @@
         const screen = document.getElementById('stats-screen');
         screen.style.display = 'block';
         if (win) {
-            // 1. 20문제 성공 시 귀여운 소리
             audioWin.play();
             document.getElementById('stats-content').innerText = `대단해 정아인!\n전부 맞혔어!\n점수: 100점!`;
             document.getElementById('reward-icon').innerText = "🎟️ 소원권";
         } else {
-            rabbitGroup.style.display = 'none';
             document.getElementById('stats-content').innerText = `${msg}\n${score}문제를 맞혔어.\n점수: ${(score/totalQuest)*100}점`;
             document.getElementById('reward-icon').innerText = "⭐";
         }
