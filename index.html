@@ -13,6 +13,8 @@
             --tree-deep: #3e2723;
             --tree-mid: #5d4037;
             --tree-light: #795548;
+            --leaf-green-dark: #388e3c;
+            --leaf-green-light: #66bb6a;
         }
 
         body { margin: 0; overflow: hidden; font-family: 'Nanum Gothic', sans-serif; background: var(--sky-bottom); user-select: none; touch-action: manipulation; }
@@ -39,6 +41,22 @@
             background: linear-gradient(90deg, var(--tree-deep) 0%, var(--tree-mid) 25%, var(--tree-light) 50%, var(--tree-mid) 75%, var(--tree-deep) 100%);
             transform: translateX(-50%); border-radius: 60px; z-index: 1; 
             box-shadow: inset 0 0 80px rgba(0,0,0,0.5);
+            /* 나뭇가지와 잎사귀 컨테이너 역할 */
+            overflow: hidden; /* 가지가 나무 바깥으로 나가지 않게 */
+        }
+
+        /* 추가: 나뭇가지 스타일 */
+        .tree-branch {
+            position: absolute; background: var(--tree-mid); border-radius: 10px;
+            width: 80px; height: 15px; z-index: 2; /* 나무 기둥 위로 오게 */
+        }
+        /* 추가: 잎사귀 뭉치 스타일 */
+        .leaf-cluster {
+            position: absolute; border-radius: 50%;
+            width: 50px; height: 40px;
+            background: linear-gradient(to bottom right, var(--leaf-green-light), var(--leaf-green-dark));
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
+            z-index: 3; /* 가지 위로 오게 */
         }
 
         .stair { 
@@ -88,7 +106,7 @@
     <div class="cloud" style="top: 10%; width: 120px; height: 40px; animation-delay: 0s;"></div>
     <div class="cloud" style="top: 30%; width: 180px; height: 60px; animation-delay: -5s;"></div>
     <div id="game-world">
-        <div class="giant-tree"></div>
+        <div class="giant-tree" id="main-tree"></div>
         <div id="stair-container"></div>
         <div id="rabbit-group">
             <div id="rabbit-bubble"></div>
@@ -114,8 +132,7 @@
 </div>
 
 <script>
-    // 1. 배경음 삭제 및 정답 시 '띵동' 소리만 반영
-    const audioCorrect = new Audio('https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3'); 
+    const audioCorrect = new Audio('https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3'); 
     const audioWin = new Audio('https://assets.mixkit.co/active_storage/sfx/1432/1432-preview.mp3');
 
     const gameWorld = document.getElementById('game-world');
@@ -127,6 +144,7 @@
     const timerEl = document.getElementById('timer');
     const remainEl = document.getElementById('remain-info');
     const stairContainer = document.getElementById('stair-container');
+    const mainTree = document.getElementById('main-tree'); // 나무 요소 가져오기
 
     let currentLvl = 0;
     let score = 0;
@@ -135,12 +153,53 @@
     let correctVal = 0;
     const totalQuest = 20;
 
-    // 2. 응원 문구 리스트 (랜덤 반영용)
     const cheerMessages = [
         "아인이 잘한다!", "아인아 힘내!", "소원권 가자~", "좋아! 좋아!", 
         "아인아 조금만 더!", "아인이 굳! 굳!", "아인이 최고!", "아인이 화이팅!", 
         "조금만 더!", "힘내라 힘!", "와아 진짜 최고!"
     ];
+
+    // 나뭇가지와 잎사귀를 동적으로 생성하는 함수
+    function createTreeBranchesAndLeaves() {
+        // 나무의 전체 높이를 기준으로 가지 배치
+        const treeHeight = 6000; 
+        const branchCount = 40; // 더 많은 가지를 생성
+        
+        for (let i = 0; i < branchCount; i++) {
+            const branch = document.createElement('div');
+            branch.className = 'tree-branch';
+            
+            // 가지의 위치와 길이, 회전 각도 랜덤 설정
+            const branchY = Math.random() * treeHeight;
+            const isLeft = Math.random() > 0.5; // 좌우 랜덤 배치
+            
+            branch.style.top = `${branchY}px`;
+            branch.style.width = `${Math.random() * 60 + 50}px`; // 50px ~ 110px
+            branch.style.transform = `rotate(${Math.random() * 30 - 15}deg)`; // -15도 ~ 15도 회전
+            
+            if (isLeft) {
+                branch.style.left = `${Math.random() * 50 - 60}px`; // 나무 왼쪽 밖으로 살짝 뻗게
+                branch.style.transform += ' scaleX(-1)'; // 좌우 반전
+            } else {
+                branch.style.right = `${Math.random() * 50 - 60}px`; // 나무 오른쪽 밖으로 살짝 뻗게
+            }
+
+            // 잎사귀 뭉치 생성 (각 가지마다 2~3개)
+            const leafCount = Math.floor(Math.random() * 2) + 2; // 2~3개 잎사귀
+            for(let j=0; j<leafCount; j++) {
+                const leaf = document.createElement('div');
+                leaf.className = 'leaf-cluster';
+                // 가지 끝 부분에 잎사귀 배치
+                leaf.style.left = `${Math.random() * 20 + branch.offsetWidth - 20}px`; 
+                leaf.style.top = `${Math.random() * 20 - 10}px`;
+                leaf.style.width = `${Math.random() * 30 + 30}px`; // 30px ~ 60px
+                leaf.style.height = `${Math.random() * 30 + 30}px`;
+                branch.appendChild(leaf);
+            }
+            mainTree.appendChild(branch);
+        }
+    }
+
 
     function initStairs() {
         for (let i = 0; i < totalQuest + 5; i++) {
@@ -211,7 +270,6 @@
         currentLvl++;
         updateRabbitPosition();
         setTimeout(() => {
-            // 2. 요청하신 문구 중 랜덤 출력
             const randomMsg = cheerMessages[Math.floor(Math.random() * cheerMessages.length)];
             showRabbitSpeech(randomMsg);
             quizBox.style.display = 'block';
@@ -235,7 +293,7 @@
         if (val === correctVal) {
             clearInterval(timer);
             score++;
-            audioCorrect.play(); // 1. 정답 시 '띵동' 소리
+            audioCorrect.play();
             quizBox.style.display = 'none';
             setTimeout(startTurn, 500);
         } else {
@@ -258,9 +316,11 @@
         }
     }
 
+    createTreeBranchesAndLeaves(); // 게임 시작 시 나뭇가지와 잎사귀 생성
     initStairs();
     updateRabbitPosition();
     setTimeout(startTurn, 1000);
 </script>
 </body>
 </html>
+```http://googleusercontent.com/image_generation_content/6
