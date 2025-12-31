@@ -1,6 +1,6 @@
 const TOTAL = 20;
 const TIME_LIMIT = 20;
-const CHILD = "정아인";
+const NAME = "정아인";
 
 const stairs = document.getElementById("stairs");
 const bunny = document.getElementById("bunny");
@@ -10,39 +10,53 @@ const popupBtn = document.getElementById("popupBtn");
 const form = document.getElementById("answerForm");
 const input = document.getElementById("answerInput");
 
+const timerEl = document.getElementById("timer");
+const progressEl = document.getElementById("progress");
+
 let stage = 0;
 let correct = 0;
 let answer = 0;
 let timer = null;
 
-/* 계단 생성 */
+/* 사운드 */
+const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+function beep(freq=600,dur=0.12){
+  const o=audioCtx.createOscillator();
+  const g=audioCtx.createGain();
+  o.frequency.value=freq;
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start();
+  g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+dur);
+  o.stop(audioCtx.currentTime+dur);
+}
+
+/* 계단 */
 for(let i=0;i<TOTAL;i++){
-  const s = document.createElement("div");
-  s.className="step";
-  stairs.appendChild(s);
+  const d=document.createElement("div");
+  d.className="step";
+  stairs.appendChild(d);
 }
 
 /* 팝업 */
-function showPopup(text, withInput=false){
-  popupText.innerHTML = text;
+function showPopup(txt,withInput=false){
+  popupText.innerHTML=txt;
   popup.classList.remove("hidden");
-  form.classList.toggle("hidden", !withInput);
-  popupBtn.style.display = withInput ? "none":"block";
+  form.classList.toggle("hidden",!withInput);
+  popupBtn.style.display=withInput?"none":"block";
 }
 
-popupBtn.onclick = ()=> popup.classList.add("hidden");
-
-/* 문제 생성 */
-function makeQuestion(n){
+/* 문제 */
+function makeQuestion(){
   let a,b;
-  if(n<6){a=r(1,9);b=r(1,9);}
-  else if(n<13){a=r(5,20);b=r(1,9);}
+  if(stage<6){a=r(1,9);b=r(1,9);}
+  else if(stage<13){a=r(5,30);b=r(1,9);}
   else{a=r(10,60);b=r(10,60);}
   answer=a+b;
+  input.value=""; // 👈 입력값 초기화
+
   showPopup(
     `👩‍🏫 선생님 괴물 등장!<br><br>
-     ${CHILD}아 문제를 맞히면 더 올라갈 수 있어!<br>
-     ⏱ ${TIME_LIMIT}초 안에 풀어보자!<br><br>
+     ${NAME}아 맞히면 더 올라갈 수 있어!<br>
      <b>${a} + ${b} = ?</b>`,
     true
   );
@@ -52,33 +66,35 @@ function makeQuestion(n){
 /* 타이머 */
 function startTimer(){
   let t=TIME_LIMIT;
+  timerEl.textContent=`⏱ ${t}초`;
   clearInterval(timer);
   timer=setInterval(()=>{
     t--;
-    if(t===10||t===5) showPopup(`⏰ 띵! ${t}초 남았어!`);
+    timerEl.textContent=`⏱ ${t}초`;
+    if(t===10||t===5){beep(800);}
     if(t<=0){fail();}
   },1000);
 }
 
-/* 성공 */
+/* 제출 */
 form.onsubmit=e=>{
   e.preventDefault();
   clearInterval(timer);
   popup.classList.add("hidden");
   if(Number(input.value)===answer){
-    correct++;
+    correct++; stage++;
+    beep(1000);
     bunny.classList.add("jump");
     setTimeout(()=>bunny.classList.remove("jump"),300);
-    stage++;
-    window.scrollBy({top:120,behavior:"smooth"});
+    window.scrollBy({top:-120,behavior:"smooth"}); // 👈 위로 올라감
     if(stage>=TOTAL) finish(true);
-    else setTimeout(()=>makeQuestion(stage),600);
+    else setTimeout(makeQuestion,600);
   }else fail();
 };
 
 /* 실패 */
 function fail(){
-  clearInterval(timer);
+  beep(300);
   bunny.classList.add("vanish");
   finish(false);
 }
@@ -87,19 +103,26 @@ function fail(){
 function finish(clear){
   showPopup(
     clear
-    ? `🎉 완주 성공!<br>${correct}/20 정답<br>점수 ${Math.round(correct/20*100)}점<br>🎟 소원권 1개`
-    : `😳 앗! 게임 종료<br>${correct}/20 정답<br>점수 ${Math.round(correct/20*100)}점`
+    ? `🎉 완주 성공!<br><br>
+       ⭐ ${correct}/20 정답<br>
+       💯 점수 ${Math.round(correct/TOTAL*100)}점<br>
+       🎟 소원권 1개`
+    : `😳 앗!<br><br>
+       ${correct}/20 정답<br>
+       점수 ${Math.round(correct/TOTAL*100)}점`
   );
 }
 
 /* 시작 */
-showPopup(
-  `🐰 ${CHILD}의 수학 모험!<br><br>
-   계단을 올라가며 문제를 풀어보자!`
-);
+function updateHud(){
+  progressEl.textContent=`맞춘 문제 ${correct} / 남은 문제 ${TOTAL-correct}`;
+}
 popupBtn.onclick=()=>{
   popup.classList.add("hidden");
-  makeQuestion(0);
+  makeQuestion();
+  updateHud();
 };
+
+showPopup(`🐰 ${NAME}의 수학 모험!<br>계단을 올라가보자!`);
 
 function r(a,b){return Math.floor(Math.random()*(b-a+1))+a}
