@@ -152,7 +152,7 @@
     let currentLvl = 0;
     let score = 0;
     let timer;
-    let timeLeft = 20;
+    let timeLeft = 10;
     let correctVal = 0;
     const totalQuest = 20;
 
@@ -272,7 +272,7 @@
     }
 
     function startTimer() {
-        timeLeft = 20;
+        timeLeft = 10;
         timerEl.innerText = `🕒 ${timeLeft}`;
         clearInterval(timer);
         timer = setInterval(() => {
@@ -315,3 +315,4 @@
 </script>
 </body>
 </html>
+
