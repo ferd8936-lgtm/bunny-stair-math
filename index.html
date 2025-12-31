@@ -13,8 +13,8 @@
             --tree-deep: #3e2723;
             --tree-mid: #5d4037;
             --tree-light: #795548;
-            --leaf-green-dark: #388e3c;
-            --leaf-green-light: #66bb6a;
+            --leaf-green: #2e7d32;
+            --vine-green: #81c784;
         }
 
         body { margin: 0; overflow: hidden; font-family: 'Nanum Gothic', sans-serif; background: var(--sky-bottom); user-select: none; touch-action: manipulation; }
@@ -29,35 +29,21 @@
             position: absolute; background: white; border-radius: 50px; opacity: 0.6;
             filter: blur(3px); animation: float 15s infinite linear;
         }
-        @keyframes float {
-            from { transform: translateX(-150px); }
-            to { transform: translateX(110vw); }
-        }
+        @keyframes float { from { transform: translateX(-150px); } to { transform: translateX(110vw); } }
 
         #game-world { position: relative; width: 100vw; height: 100vh; transition: transform 0.8s ease-in-out; }
 
+        /* 1. 나무 디자인 강화: 질감, 넝쿨, 풍성한 잎사귀 */
         .giant-tree { 
-            position: absolute; left: 50%; bottom: -2000px; width: 320px; height: 6000px; 
+            position: absolute; left: 50%; bottom: -2000px; width: 340px; height: 6000px; 
             background: linear-gradient(90deg, var(--tree-deep) 0%, var(--tree-mid) 25%, var(--tree-light) 50%, var(--tree-mid) 75%, var(--tree-deep) 100%);
-            transform: translateX(-50%); border-radius: 60px; z-index: 1; 
-            box-shadow: inset 0 0 80px rgba(0,0,0,0.5);
-            /* 나뭇가지와 잎사귀 컨테이너 역할 */
-            overflow: hidden; /* 가지가 나무 바깥으로 나가지 않게 */
+            transform: translateX(-50%); border-radius: 70px; z-index: 1; 
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.6);
         }
 
-        /* 추가: 나뭇가지 스타일 */
-        .tree-branch {
-            position: absolute; background: var(--tree-mid); border-radius: 10px;
-            width: 80px; height: 15px; z-index: 2; /* 나무 기둥 위로 오게 */
-        }
-        /* 추가: 잎사귀 뭉치 스타일 */
-        .leaf-cluster {
-            position: absolute; border-radius: 50%;
-            width: 50px; height: 40px;
-            background: linear-gradient(to bottom right, var(--leaf-green-light), var(--leaf-green-dark));
-            box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
-            z-index: 3; /* 가지 위로 오게 */
-        }
+        /* 넝쿨 및 잎사귀 스타일 */
+        .vine-deco { position: absolute; width: 10px; height: 100%; background: var(--vine-green); opacity: 0.6; border-radius: 5px; }
+        .leaf-cluster { position: absolute; background: var(--leaf-green); border-radius: 50%; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); opacity: 0.9; }
 
         .stair { 
             position: absolute; width: 130px; height: 25px; 
@@ -70,9 +56,7 @@
         #rabbit { font-size: 65px; }
 
         #rabbit-bubble {
-            position: absolute;
-            left: 80px;
-            top: -20px;
+            position: absolute; left: 85px; top: -25px;
             background: #fff; border: 3px solid #ff80ab; padding: 5px 12px;
             border-radius: 15px; font-family: 'Nanum Pen Script', cursive; font-size: 24px; font-weight: 800;
             color: #d81b60; white-space: nowrap; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
@@ -105,6 +89,7 @@
 <div id="game-container">
     <div class="cloud" style="top: 10%; width: 120px; height: 40px; animation-delay: 0s;"></div>
     <div class="cloud" style="top: 30%; width: 180px; height: 60px; animation-delay: -5s;"></div>
+    
     <div id="game-world">
         <div class="giant-tree" id="main-tree"></div>
         <div id="stair-container"></div>
@@ -144,7 +129,7 @@
     const timerEl = document.getElementById('timer');
     const remainEl = document.getElementById('remain-info');
     const stairContainer = document.getElementById('stair-container');
-    const mainTree = document.getElementById('main-tree'); // 나무 요소 가져오기
+    const mainTree = document.getElementById('main-tree');
 
     let currentLvl = 0;
     let score = 0;
@@ -159,47 +144,29 @@
         "조금만 더!", "힘내라 힘!", "와아 진짜 최고!"
     ];
 
-    // 나뭇가지와 잎사귀를 동적으로 생성하는 함수
-    function createTreeBranchesAndLeaves() {
-        // 나무의 전체 높이를 기준으로 가지 배치
-        const treeHeight = 6000; 
-        const branchCount = 40; // 더 많은 가지를 생성
-        
-        for (let i = 0; i < branchCount; i++) {
-            const branch = document.createElement('div');
-            branch.className = 'tree-branch';
-            
-            // 가지의 위치와 길이, 회전 각도 랜덤 설정
-            const branchY = Math.random() * treeHeight;
-            const isLeft = Math.random() > 0.5; // 좌우 랜덤 배치
-            
-            branch.style.top = `${branchY}px`;
-            branch.style.width = `${Math.random() * 60 + 50}px`; // 50px ~ 110px
-            branch.style.transform = `rotate(${Math.random() * 30 - 15}deg)`; // -15도 ~ 15도 회전
-            
-            if (isLeft) {
-                branch.style.left = `${Math.random() * 50 - 60}px`; // 나무 왼쪽 밖으로 살짝 뻗게
-                branch.style.transform += ' scaleX(-1)'; // 좌우 반전
-            } else {
-                branch.style.right = `${Math.random() * 50 - 60}px`; // 나무 오른쪽 밖으로 살짝 뻗게
-            }
+    // 1. 나무 장식(잎사귀 및 넝쿨) 생성 함수
+    function decorateTree() {
+        for (let i = 0; i < 40; i++) {
+            // 넝쿨
+            const vine = document.createElement('div');
+            vine.className = 'vine-deco';
+            vine.style.left = (Math.random() * 300 + 20) + 'px';
+            vine.style.top = (i * 150) + 'px';
+            vine.style.height = (Math.random() * 100 + 100) + 'px';
+            vine.style.transform = `rotate(${Math.random() * 20 - 10}deg)`;
+            mainTree.appendChild(vine);
 
-            // 잎사귀 뭉치 생성 (각 가지마다 2~3개)
-            const leafCount = Math.floor(Math.random() * 2) + 2; // 2~3개 잎사귀
-            for(let j=0; j<leafCount; j++) {
-                const leaf = document.createElement('div');
-                leaf.className = 'leaf-cluster';
-                // 가지 끝 부분에 잎사귀 배치
-                leaf.style.left = `${Math.random() * 20 + branch.offsetWidth - 20}px`; 
-                leaf.style.top = `${Math.random() * 20 - 10}px`;
-                leaf.style.width = `${Math.random() * 30 + 30}px`; // 30px ~ 60px
-                leaf.style.height = `${Math.random() * 30 + 30}px`;
-                branch.appendChild(leaf);
-            }
-            mainTree.appendChild(branch);
+            // 잎사귀
+            const leaf = document.createElement('div');
+            leaf.className = 'leaf-cluster';
+            const size = Math.random() * 30 + 30;
+            leaf.style.width = size + 'px';
+            leaf.style.height = (size * 0.8) + 'px';
+            leaf.style.left = (Math.random() * 320 - 10) + 'px';
+            leaf.style.top = (i * 150 + Math.random() * 100) + 'px';
+            mainTree.appendChild(leaf);
         }
     }
-
 
     function initStairs() {
         for (let i = 0; i < totalQuest + 5; i++) {
@@ -223,12 +190,15 @@
         }
     }
 
+    // 2. 물리 보정: 토끼가 계단 표면에 정확히 안착하도록 Y 좌표 미세 조정
     function updateRabbitPosition() {
         const angle = currentLvl * 0.9;
         const x = Math.sin(angle) * 120 + (window.innerWidth / 2) - 65;
-        const y = window.innerHeight - (currentLvl * 90) - 185;
+        // 기존 -185에서 계단 두께와 토끼 발 위치를 고려하여 -145로 보정 (정확히 노란색 면 위)
+        const y = window.innerHeight - (currentLvl * 90) - 145; 
         rabbitGroup.style.left = x + 'px';
         rabbitGroup.style.top = y + 'px';
+        rabbitGroup.style.zIndex = Math.cos(angle) > 0 ? 10 : 3;
     }
 
     function showRabbitSpeech(msg) {
@@ -316,11 +286,10 @@
         }
     }
 
-    createTreeBranchesAndLeaves(); // 게임 시작 시 나뭇가지와 잎사귀 생성
+    decorateTree();
     initStairs();
     updateRabbitPosition();
     setTimeout(startTurn, 1000);
 </script>
 </body>
 </html>
-```http://googleusercontent.com/image_generation_content/6
