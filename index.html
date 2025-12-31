@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>정아인의 하늘 나무 수학 모험</title>
     <style>
-        /* 폰트 적용: 깃허브에 올리신 NexonLv2Gothic_2.ttf 연결 */
         @font-face {
             font-family: 'NexonGothic';
             src: url('./NexonLv2Gothic_2.ttf') format('truetype');
@@ -13,7 +12,6 @@
             font-style: normal;
         }
 
-        /* 말풍선용 귀여운 폰트 유지 */
         @import url('https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap');
 
         :root {
@@ -27,7 +25,7 @@
         body { 
             margin: 0; 
             overflow: hidden; 
-            font-family: 'NexonGothic', sans-serif; /* 넥슨 고딕 적용 */
+            font-family: 'NexonGothic', sans-serif; 
             background: var(--sky-bottom); 
             user-select: none; 
             touch-action: manipulation; 
@@ -64,22 +62,22 @@
         #rabbit-group { position: absolute; z-index: 10; transition: all 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         #rabbit { font-size: 65px; line-height: 1; }
 
-        /* 말풍선 위치: 토끼 기준 화면 중앙쪽(옆면) 배치 */
+        /* 말풍선: 토끼 위치에 따라 화면 중앙 쪽으로 자동 배치 */
         #rabbit-bubble {
             position: absolute;
-            left: 70px; 
-            top: 0; 
             background: #fff; border: 3px solid #ff80ab; padding: 5px 12px;
             border-radius: 15px; 
-            font-family: 'Nanum Pen Script', cursive; /* 말풍선은 손글씨 느낌 유지 */
+            font-family: 'Nanum Pen Script', cursive; 
             font-size: 26px; font-weight: 800;
             color: #d81b60; white-space: nowrap; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             display: none; z-index: 11;
+            top: 0;
         }
+
+        /* 말풍선 꼬리 공통 스타일 */
         #rabbit-bubble::after { 
-            content: ''; position: absolute; left: -10px; top: 15px;
-            border-width: 8px 10px 8px 0; border-style: solid; 
-            border-color: transparent #ff80ab transparent transparent; 
+            content: ''; position: absolute; 
+            border-style: solid; 
         }
 
         #ui-layer { position: absolute; top: 10px; left: 0; width: 100%; pointer-events: none; z-index: 100; display: flex; flex-direction: column; align-items: center; }
@@ -188,12 +186,42 @@
 
     function updateRabbitPosition() {
         const angle = currentLvl * 0.9;
-        const x = Math.sin(angle) * 120 + (window.innerWidth / 2) - 65;
-        // 물리 보정: 토끼 하단이 계단 상단에 정확히 안착
+        const centerX = window.innerWidth / 2;
+        const rabbitX = Math.sin(angle) * 120 + centerX - 65;
         const y = window.innerHeight - (currentLvl * 90) - 185; 
-        rabbitGroup.style.left = x + 'px';
+        
+        rabbitGroup.style.left = rabbitX + 'px';
         rabbitGroup.style.top = y + 'px';
         rabbitGroup.style.zIndex = Math.cos(angle) > 0 ? 10 : 3;
+
+        // 말풍선 방향 제어: 토끼가 화면 왼쪽이면 오른쪽으로, 오른쪽이면 왼쪽으로 (중앙 방향)
+        if (rabbitX + 32 < centerX) { 
+            // 토끼가 왼쪽에 있음 -> 말풍선을 오른쪽에 배치
+            rabbitBubble.style.left = "75px";
+            rabbitBubble.style.right = "auto";
+            rabbitBubble.style.setProperty('--tail-left', '-10px');
+            rabbitBubble.style.setProperty('--tail-border', 'transparent #ff80ab transparent transparent');
+            rabbitBubble.style.setProperty('--tail-width', '8px 10px 8px 0');
+            applyBubbleTail('right');
+        } else {
+            // 토끼가 오른쪽에 있음 -> 말풍선을 왼쪽에 배치
+            rabbitBubble.style.left = "auto";
+            rabbitBubble.style.right = "75px";
+            applyBubbleTail('left');
+        }
+    }
+
+    function applyBubbleTail(direction) {
+        const style = document.createElement('style');
+        if (direction === 'right') {
+            style.innerHTML = `#rabbit-bubble::after { left: -10px; right: auto; border-width: 8px 10px 8px 0; border-color: transparent #ff80ab transparent transparent; top: 15px; }`;
+        } else {
+            style.innerHTML = `#rabbit-bubble::after { right: -10px; left: auto; border-width: 8px 0 8px 10px; border-color: transparent transparent transparent #ff80ab; top: 15px; }`;
+        }
+        const oldStyle = document.getElementById('bubble-tail-style');
+        if (oldStyle) oldStyle.remove();
+        style.id = 'bubble-tail-style';
+        document.head.appendChild(style);
     }
 
     function showRabbitSpeech(msg) {
