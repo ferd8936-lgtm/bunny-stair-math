@@ -31,7 +31,6 @@
 
         #game-world { position: relative; width: 100vw; height: 100vh; transition: transform 0.8s ease-in-out; }
 
-        /* 나무 디자인: 넝쿨과 잎사귀 없이 깔끔한 그라데이션 유지 */
         .giant-tree { 
             position: absolute; left: 50%; bottom: -2000px; width: 320px; height: 6000px; 
             background: linear-gradient(90deg, var(--tree-deep) 0%, var(--tree-mid) 25%, var(--tree-light) 50%, var(--tree-mid) 75%, var(--tree-deep) 100%);
@@ -49,17 +48,22 @@
         #rabbit-group { position: absolute; z-index: 10; transition: all 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         #rabbit { font-size: 65px; }
 
+        /* 1. 말풍선 복원: 토끼 기준 화면 가로 중앙 쪽 배치 */
         #rabbit-bubble {
-            position: absolute; left: 80px; top: -20px;
+            position: absolute;
+            left: 50%; /* 토끼 가로 중앙 기준 */
+            transform: translateX(-50%); /* 중앙 정렬 */
+            bottom: 80px; /* 토끼 머리 위쪽 */
             background: #fff; border: 3px solid #ff80ab; padding: 5px 12px;
             border-radius: 15px; font-family: 'Nanum Pen Script', cursive; font-size: 24px; font-weight: 800;
             color: #d81b60; white-space: nowrap; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             display: none; z-index: 11;
         }
         #rabbit-bubble::after { 
-            content: ''; position: absolute; left: -10px; top: 20px; 
-            border-width: 8px 10px 8px 0; border-style: solid; 
-            border-color: transparent #ff80ab transparent transparent; 
+            content: ''; position: absolute; left: 50%; bottom: -12px; 
+            transform: translateX(-50%);
+            border-width: 12px 10px 0 10px; border-style: solid; 
+            border-color: #ff80ab transparent transparent transparent; 
         }
 
         #ui-layer { position: absolute; top: 10px; left: 0; width: 100%; pointer-events: none; z-index: 100; display: flex; flex-direction: column; align-items: center; }
@@ -158,11 +162,11 @@
         }
     }
 
-    // 물리 보정: 계단 표면에 발이 정확히 닿도록 보정
+    // 2. 물리 보정: 계단 표면에 발이 정확히 닿도록 보정
     function updateRabbitPosition() {
         const angle = currentLvl * 0.9;
         const x = Math.sin(angle) * 120 + (window.innerWidth / 2) - 65;
-        // 계단 바로 윗면에 안착하도록 Y 좌표 보정
+        // 계단 바로 윗면에 안착하도록 Y 좌표 보정 (-145px)
         const y = window.innerHeight - (currentLvl * 90) - 145; 
         rabbitGroup.style.left = x + 'px';
         rabbitGroup.style.top = y + 'px';
