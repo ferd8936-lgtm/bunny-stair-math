@@ -5,7 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>정아인의 하늘 나무 수학 모험</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&family=Nanum+Gothic:wght@700;800&display=swap');
+        /* 폰트 적용: 깃허브에 올리신 NexonLv2Gothic_2.ttf 연결 */
+        @font-face {
+            font-family: 'NexonGothic';
+            src: url('./NexonLv2Gothic_2.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        /* 말풍선용 귀여운 폰트 유지 */
+        @import url('https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap');
 
         :root {
             --sky-top: #4facfe;
@@ -15,7 +24,14 @@
             --tree-light: #795548;
         }
 
-        body { margin: 0; overflow: hidden; font-family: 'Nanum Gothic', sans-serif; background: var(--sky-bottom); user-select: none; touch-action: manipulation; }
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            font-family: 'NexonGothic', sans-serif; /* 넥슨 고딕 적용 */
+            background: var(--sky-bottom); 
+            user-select: none; 
+            touch-action: manipulation; 
+        }
 
         #game-container { 
             position: relative; width: 100vw; height: 100vh; 
@@ -46,24 +62,24 @@
         }
 
         #rabbit-group { position: absolute; z-index: 10; transition: all 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        #rabbit { font-size: 65px; }
+        #rabbit { font-size: 65px; line-height: 1; }
 
-        /* 1. 말풍선 복원: 토끼 기준 화면 가로 중앙 쪽 배치 */
+        /* 말풍선 위치: 토끼 기준 화면 중앙쪽(옆면) 배치 */
         #rabbit-bubble {
             position: absolute;
-            left: 50%; /* 토끼 가로 중앙 기준 */
-            transform: translateX(-50%); /* 중앙 정렬 */
-            bottom: 80px; /* 토끼 머리 위쪽 */
+            left: 70px; 
+            top: 0; 
             background: #fff; border: 3px solid #ff80ab; padding: 5px 12px;
-            border-radius: 15px; font-family: 'Nanum Pen Script', cursive; font-size: 24px; font-weight: 800;
+            border-radius: 15px; 
+            font-family: 'Nanum Pen Script', cursive; /* 말풍선은 손글씨 느낌 유지 */
+            font-size: 26px; font-weight: 800;
             color: #d81b60; white-space: nowrap; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             display: none; z-index: 11;
         }
         #rabbit-bubble::after { 
-            content: ''; position: absolute; left: 50%; bottom: -12px; 
-            transform: translateX(-50%);
-            border-width: 12px 10px 0 10px; border-style: solid; 
-            border-color: #ff80ab transparent transparent transparent; 
+            content: ''; position: absolute; left: -10px; top: 15px;
+            border-width: 8px 10px 8px 0; border-style: solid; 
+            border-color: transparent #ff80ab transparent transparent; 
         }
 
         #ui-layer { position: absolute; top: 10px; left: 0; width: 100%; pointer-events: none; z-index: 100; display: flex; flex-direction: column; align-items: center; }
@@ -77,9 +93,17 @@
         #question { font-size: 38px; margin: 5px 0; color: #2e7d32; font-weight: 800; }
         
         #options-container { display: flex; justify-content: space-around; gap: 8px; }
-        .option-btn { flex: 1; font-size: 26px; padding: 8px; background: #fff; border: 3px solid #66bb6a; border-radius: 12px; cursor: pointer; font-weight: bold; color: #2e7d32; box-shadow: 0 4px 0 #388e3c; }
+        .option-btn { 
+            flex: 1; font-family: 'NexonGothic', sans-serif; font-size: 26px; padding: 8px; 
+            background: #fff; border: 3px solid #66bb6a; border-radius: 12px; 
+            cursor: pointer; font-weight: bold; color: #2e7d32; box-shadow: 0 4px 0 #388e3c; 
+        }
 
-        #stats-screen { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 30px; border: 8px solid #ffd54f; text-align: center; display: none; z-index: 200; width: 65%; max-width: 260px; }
+        #stats-screen { 
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            background: white; padding: 25px; border-radius: 30px; border: 8px solid #ffd54f; 
+            text-align: center; display: none; z-index: 200; width: 65%; max-width: 260px; 
+        }
     </style>
 </head>
 <body>
@@ -109,7 +133,7 @@
         <h1 style="color: #f57c00; font-size: 22px;">정아인 결과</h1>
         <p id="stats-content" style="font-size: 18px; line-height: 2.2; font-weight: bold;"></p>
         <div id="reward-icon" style="font-size: 50px; margin: 10px;"></div>
-        <button onclick="location.reload()" style="font-size: 18px; padding: 8px 20px; background: #ffa726; color: #fff; border: none; border-radius: 20px; cursor: pointer;">다시 하기</button>
+        <button onclick="location.reload()" style="font-size: 18px; padding: 8px 20px; background: #ffa726; color: #fff; border: none; border-radius: 20px; cursor: pointer; font-family: 'NexonGothic', sans-serif;">다시 하기</button>
     </div>
 </div>
 
@@ -162,12 +186,11 @@
         }
     }
 
-    // 2. 물리 보정: 계단 표면에 발이 정확히 닿도록 보정
     function updateRabbitPosition() {
         const angle = currentLvl * 0.9;
         const x = Math.sin(angle) * 120 + (window.innerWidth / 2) - 65;
-        // 계단 바로 윗면에 안착하도록 Y 좌표 보정 (-145px)
-        const y = window.innerHeight - (currentLvl * 90) - 145; 
+        // 물리 보정: 토끼 하단이 계단 상단에 정확히 안착
+        const y = window.innerHeight - (currentLvl * 90) - 185; 
         rabbitGroup.style.left = x + 'px';
         rabbitGroup.style.top = y + 'px';
         rabbitGroup.style.zIndex = Math.cos(angle) > 0 ? 10 : 3;
