@@ -3,132 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>정아인의 아마존 수학 모험</title>
+    <title>정아인의 하늘 나무 수학 모험</title>
     <style>
         :root {
-            --forest-green: #2d5a27;
-            --sky-blue: #87CEEB;
+            --tree-brown: #5d4037;
+            --leaf-green: #2e7d32;
             --gold: #ffd700;
         }
-        body { margin: 0; overflow: hidden; font-family: 'Malgun Gothic', sans-serif; background: var(--sky-blue); }
+        body { margin: 0; overflow: hidden; font-family: 'Malgun Gothic', sans-serif; background: #87CEEB; }
 
-        /* 배경 레이어 */
+        /* 배경 시각화: 아마존 숲 느낌 */
         #game-container {
             position: relative; width: 100vw; height: 100vh;
             background: linear-gradient(to bottom, #4facfe 0%, #00f2fe 100%);
-            perspective: 1000px; overflow: hidden;
+            overflow: hidden; perspective: 1000px;
         }
 
-        /* 거대한 입체 나무 */
-        .tree-trunk {
-            position: absolute; left: 50%; bottom: -50px;
-            width: 300px; height: 120%;
+        /* 웅장한 입체 나무 */
+        .giant-tree {
+            position: absolute; left: 50%; bottom: -100px;
+            width: 320px; height: 150%;
             background: linear-gradient(90deg, #3e2723 0%, #5d4037 50%, #3e2723 100%);
             transform: translateX(-50%);
-            border-radius: 40px 40px 0 0;
-            box-shadow: inset 20px 0 50px rgba(0,0,0,0.5);
+            border-radius: 100px 100px 0 0;
+            box-shadow: inset 20px 0 60px rgba(0,0,0,0.6), 0 0 40px rgba(0,0,0,0.2);
             z-index: 1;
         }
 
-        /* 애니메이션 폭포 */
+        /* 흐르는 입체 폭포 */
         .waterfall {
             position: absolute; left: 50%; top: 0;
-            width: 60px; height: 100%;
-            background: linear-gradient(to bottom, rgba(255,255,255,0.2), #81d4fa, #29b6f6);
-            transform: translateX(80px);
-            z-index: 2; opacity: 0.8;
+            width: 70px; height: 100%;
+            background: rgba(135, 206, 250, 0.6);
+            transform: translateX(100px);
+            z-index: 2; overflow: hidden;
         }
         .waterfall::after {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: repeating-linear-gradient(transparent, transparent 20px, rgba(255,255,255,0.5) 25px);
-            animation: flow 1s linear infinite;
+            content: ""; position: absolute; top: -100%; left: 0; width: 100%; height: 200%;
+            background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.8), transparent);
+            animation: flow 1.5s linear infinite;
         }
 
-        /* 황금 계단 */
+        /* 하늘까지 이어지는 나선형 계단 */
         .stair {
-            position: absolute; width: 140px; height: 25px;
+            position: absolute; width: 150px; height: 25px;
             background: linear-gradient(to bottom, #fff176, #fbc02d);
-            border-radius: 15px; z-index: 5;
-            box-shadow: 0 6px 10px rgba(0,0,0,0.3), inset 0 -3px 5px rgba(0,0,0,0.2);
+            border-radius: 20px; z-index: 5;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.3);
             display: flex; justify-content: center; align-items: center;
-            transform-style: preserve-3d;
         }
 
-        /* 캐릭터 */
+        /* 캐릭터: 귀여운 토끼 */
         #rabbit {
             position: absolute; font-size: 70px; z-index: 10;
             transition: all 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3));
-        }
-        #monster {
-            position: absolute; font-size: 80px; z-index: 9;
-            display: none; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.4));
+            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.3));
+            user-select: none;
         }
 
-        /* UI 박스 (이미지 스타일 반영) */
+        /* 괴물 선생님 */
+        #monster {
+            position: absolute; font-size: 80px; z-index: 9;
+            display: none; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+        }
+
+        /* UI 박스 디자인 (화려함 강화) */
         #ui-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none; z-index: 100; display: flex; flex-direction: column; align-items: center;
         }
         #quiz-box {
-            pointer-events: auto; display: none; margin-top: 40px;
-            background: rgba(255, 255, 255, 0.9);
+            pointer-events: auto; display: none; margin-top: 50px;
+            background: rgba(255, 255, 255, 0.95);
             padding: 30px; border-radius: 40px; border: 8px solid #4CAF50;
-            text-align: center; width: 320px;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            text-align: center; width: 85%; max-width: 380px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
         }
 
-        /* 폰트 및 버튼 */
-        #question { font-size: 50px; color: #1b5e20; font-weight: bold; margin: 20px 0; }
-        input { font-size: 35px; width: 120px; border-radius: 15px; border: 4px solid #81c784; padding: 5px; text-align: center; }
+        #timer { font-size: 40px; color: #ff5252; font-weight: bold; }
+        #question { font-size: 55px; margin: 20px 0; color: #1b5e20; font-weight: bold; }
+        input { font-size: 35px; width: 140px; text-align: center; border-radius: 20px; border: 4px solid #81c784; padding: 10px; margin-bottom: 20px; outline: none; }
         button { 
-            font-size: 26px; padding: 12px 35px; background: #4CAF50; color: white; 
+            font-size: 28px; padding: 15px 40px; background: #4CAF50; color: white; 
             border: none; border-radius: 50px; cursor: pointer; font-weight: bold;
-            box-shadow: 0 5px 0 #2e7d32; margin-top: 15px;
+            box-shadow: 0 6px 0 #2e7d32;
         }
-        button:active { transform: translateY(3px); box-shadow: 0 2px 0 #2e7d32; }
+        button:active { transform: translateY(4px); box-shadow: 0 2px 0 #2e7d32; }
 
         /* 결과 창 */
         #result-screen {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: white; padding: 50px; border-radius: 40px; border: 10px solid #ffca28;
-            text-align: center; display: none; z-index: 200; width: 80%;
+            text-align: center; display: none; z-index: 200; width: 85%;
+            box-shadow: 0 0 100px rgba(0,0,0,0.5);
         }
 
-        /* 애니메이션 */
-        @keyframes flow { to { transform: translateY(45px); } }
-        .sparkle { position: absolute; font-size: 40px; animation: pop 0.6s forwards; z-index: 150; }
-        @keyframes pop { 0% { transform: scale(0); opacity: 1; } 100% { transform: scale(2) translateY(-60px); opacity: 0; } }
-        .star { position: absolute; animation: fall 3s linear infinite; font-size: 30px; }
+        /* 애니메이션 효과들 */
+        @keyframes flow { to { transform: translateY(50%); } }
+        .sparkle { position: absolute; font-size: 40px; animation: pop 0.6s forwards; z-index: 150; pointer-events: none;}
+        @keyframes pop { 0% { transform: scale(0); opacity: 1; } 100% { transform: scale(2.5) translateY(-80px); opacity: 0; } }
+        .star-rain { position: absolute; font-size: 40px; animation: fall 3s linear infinite; z-index: 100; }
         @keyframes fall { to { transform: translateY(100vh) rotate(360deg); } }
-        .sweat { position: absolute; top: -15px; right: -5px; font-size: 25px; animation: bounce 0.5s infinite alternate; }
-        @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(5px); } }
+        .sweat { position: absolute; top: -20px; right: -10px; font-size: 30px; animation: drip 0.8s infinite; }
+        @keyframes drip { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(20px); } }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <div class="tree-trunk"></div>
+    <div class="giant-tree"></div>
     <div class="waterfall"></div>
     <div id="stair-container"></div>
+    
     <div id="rabbit">🐰</div>
     <div id="monster">🧙‍♂️</div>
 
     <div id="ui-layer">
         <div id="quiz-box">
-            <div id="speech" style="font-size: 20px; font-weight: bold; color: #2e7d32;"></div>
-            <div id="timer" style="font-size: 35px; color: #f44336; font-weight: bold; margin: 10px;">20</div>
+            <div id="speech" style="font-size: 22px; font-weight: bold; color: #333; margin-bottom: 15px;"></div>
+            <div id="timer">20</div>
             <div id="question"></div>
             <input type="number" id="answer-input" pattern="\d*">
+            <br>
             <button onclick="checkAnswer()">제출하기</button>
         </div>
     </div>
 
     <div id="result-screen">
-        <h1 id="res-title" style="color: #ef6c00;">결과 확인!</h1>
-        <p id="res-stats" style="font-size: 26px; line-height: 1.6;"></p>
-        <div id="res-reward" style="font-size: 60px; margin: 20px;"></div>
-        <button onclick="location.reload()">다시 하기</button>
+        <h1 id="res-title" style="color: #ef6c00; font-size: 40px;">결과</h1>
+        <p id="res-stats" style="font-size: 28px; line-height: 1.6;"></p>
+        <div id="res-reward" style="font-size: 80px; margin: 30px;"></div>
+        <button onclick="location.reload()">다시 도전!</button>
     </div>
 </div>
 
@@ -142,148 +147,186 @@
     const speechEl = document.getElementById('speech');
     const stairContainer = document.getElementById('stair-container');
 
-    let step = 0;
+    let currentStep = 0;
     let score = 0;
     let timer;
-    let time = 20;
-    let ans = 0;
-    const total = 20;
+    let timeLeft = 20;
+    let currentAns = 0;
+    const totalQuestions = 20;
 
-    // 계단 나선형 배치 (3D 효과 극대화)
-    function initStairs() {
-        for (let i = 0; i < total + 5; i++) {
-            const s = document.createElement('div');
-            s.className = 'stair';
-            const angle = i * 0.8;
-            const x = Math.sin(angle) * 140 + (window.innerWidth / 2) - 70;
-            const y = window.innerHeight - (i * 90) - 120;
-            s.style.left = x + 'px';
-            s.style.top = y + 'px';
-            // 나무를 감싸는 느낌을 위해 z-index 조절
-            s.style.zIndex = Math.cos(angle) > 0 ? 6 : 0;
-            stairContainer.appendChild(s);
+    // 1. 나선형 계단 생성 (입체감 있게 배치)
+    function buildStairs() {
+        for (let i = 0; i < totalQuestions + 5; i++) {
+            const stair = document.createElement('div');
+            stair.className = 'stair';
+            const angle = i * 0.85; // 회전 각도
+            const x = Math.sin(angle) * 140 + (window.innerWidth / 2) - 75;
+            const y = window.innerHeight - (i * 95) - 120;
+            stair.style.left = x + 'px';
+            stair.style.top = y + 'px';
+            stair.style.zIndex = Math.cos(angle) > 0 ? 6 : 0; // 나무 앞뒤 구분
+            stairContainer.appendChild(stair);
         }
     }
 
-    function move() {
-        const angle = step * 0.8;
+    // 2. 캐릭터 위치 업데이트
+    function updatePosition() {
+        const angle = currentStep * 0.85;
         const x = Math.sin(angle) * 140 + (window.innerWidth / 2) - 35;
-        const y = window.innerHeight - (step * 90) - 200;
+        const y = window.innerHeight - (currentStep * 95) - 200;
         rabbit.style.left = x + 'px';
         rabbit.style.top = y + 'px';
         rabbit.style.zIndex = Math.cos(angle) > 0 ? 10 : 0;
     }
 
-    async function next() {
-        if (step >= total) { endGame(true); return; }
-
-        // 1. 오르기 연출 (땀 흘리기)
-        rabbit.innerHTML = '🐰<span class="sweat">💦</span>';
-        if (Math.random() > 0.6) spawnFriend();
-        await new Promise(r => setTimeout(r, 2000));
-        
-        step++;
-        move();
-        rabbit.innerHTML = '🐰';
-
-        // 2. 괴물 등장
-        monster.style.display = 'block';
-        monster.style.left = (parseInt(rabbit.style.left) + 30) + 'px';
-        monster.style.top = (parseInt(rabbit.style.top) - 120) + 'px';
-        
-        speechEl.innerText = `자, 정아인! ${step}번째 문제야!`;
-        quizBox.style.display = 'block';
-        
-        // 문제 난이도 (1학년 맞춤)
+    // 3. 문제 출제 로직
+    function makeQuiz() {
         let n1, n2;
-        if (step <= 7) { n1 = Math.floor(Math.random()*9)+1; n2 = Math.floor(Math.random()*9)+1; }
-        else { n1 = Math.floor(Math.random()*40)+10; n2 = Math.floor(Math.random()*40)+10; }
-        ans = n1 + n2;
+        if (currentStep <= 5) { // 1단계: 한자리 수
+            n1 = Math.floor(Math.random() * 9) + 1;
+            n2 = Math.floor(Math.random() * 9) + 1;
+        } else if (currentStep <= 15) { // 2단계: 두자리 + 한자리
+            n1 = Math.floor(Math.random() * 40) + 10;
+            n2 = Math.floor(Math.random() * 9) + 1;
+        } else { // 3단계: 두자리 + 두자리
+            n1 = Math.floor(Math.random() * 40) + 10;
+            n2 = Math.floor(Math.random() * 40) + 10;
+        }
+        currentAns = n1 + n2;
         questionEl.innerText = `${n1} + ${n2} = ?`;
-        
-        inputEl.value = '';
-        inputEl.focus();
-        startTime();
     }
 
-    function startTime() {
-        time = 20; timerEl.innerText = time;
+    // 4. 게임 루프 제어
+    async function startLevel() {
+        if (currentStep >= totalQuestions) {
+            endGame(true);
+            return;
+        }
+
+        // 토끼 힘들어하는 연출 (3초)
+        rabbit.innerHTML = '🐰<span class="sweat">💦</span>';
+        if (Math.random() > 0.5) spawnFriend(); // 응원 동물 등장
+        await new Promise(r => setTimeout(r, 2500));
+        
+        currentStep++;
+        updatePosition();
+        rabbit.innerHTML = '🐰';
+
+        // 괴물 선생님 등장 및 설명
+        monster.style.display = 'block';
+        monster.style.left = (parseInt(rabbit.style.left) + 20) + 'px';
+        monster.style.top = (parseInt(rabbit.style.top) - 130) + 'px';
+        
+        speechEl.innerText = `정아인! ${currentStep}번째 문제야. 틀리면 마법으로 뿅 사라진다!`;
+        quizBox.style.display = 'block';
+        makeQuiz();
+        inputEl.value = '';
+        inputEl.focus();
+        startTimer();
+    }
+
+    function startTimer() {
+        timeLeft = 20;
+        timerEl.innerText = timeLeft;
+        timerEl.style.color = "#ff5252";
         clearInterval(timer);
         timer = setInterval(() => {
-            time--; timerEl.innerText = time;
-            if(time <= 10 && time > 0 && time % 5 === 0) { /* 띵 효과음 대신 시각 효과 */ }
-            if(time <= 0) { endGame(false, "시간이 다 됐어!"); }
+            timeLeft--;
+            timerEl.innerText = timeLeft;
+            if (timeLeft === 10 || timeLeft === 5) showDing();
+            if (timeLeft <= 0) endGame(false, "시간이 다 됐어!");
         }, 1000);
     }
 
+    function showDing() {
+        const d = document.createElement('div');
+        d.className = 'sparkle'; d.innerText = '🔔 띵!';
+        d.style.left = '50%'; d.style.top = '10%';
+        document.body.appendChild(d);
+        setTimeout(() => d.remove(), 600);
+    }
+
     function checkAnswer() {
-        if (parseInt(inputEl.value) === ans) {
+        if (parseInt(inputEl.value) === currentAns) {
             clearInterval(timer);
             score++;
-            effect("✨ 정답!", "#ffeb3b");
-            quizBox.style.display = 'none';
-            monster.style.display = 'none';
-            next();
+            celebrate();
         } else {
-            endGame(false, "틀렸어!");
+            endGame(false, "앗! 틀렸어.");
         }
     }
 
-    function effect(txt, col) {
-        const e = document.createElement('div');
-        e.className = 'sparkle'; e.innerText = txt; e.style.color = col;
-        e.style.left = rabbit.style.left; e.style.top = rabbit.style.top;
-        document.body.appendChild(e);
-        setTimeout(() => e.remove(), 600);
+    function celebrate() {
+        // 폴짝 점프 + 반짝 효과
+        rabbit.style.transform = 'translateY(-60px) scale(1.3)';
+        const s = document.createElement('div');
+        s.className = 'sparkle'; s.innerText = '✨ 반짝!';
+        s.style.left = rabbit.style.left; s.style.top = rabbit.style.top;
+        document.body.appendChild(s);
+
+        setTimeout(() => {
+            rabbit.style.transform = 'translateY(0) scale(1)';
+            quizBox.style.display = 'none';
+            monster.style.display = 'none';
+            s.remove();
+            startLevel();
+        }, 800);
     }
 
     function spawnFriend() {
-        const f = document.createElement('div');
-        f.style.position = 'absolute'; f.style.fontSize = '45px';
-        f.innerText = ['🐿️', '🦉', '🐒', '🦋'][Math.floor(Math.random()*4)];
-        f.style.left = Math.random() * (window.innerWidth - 60) + 'px';
-        f.style.top = (parseInt(rabbit.style.top) + 100) + 'px';
-        document.body.appendChild(f);
-        
+        const f = ['🐿️', '🦉', '🐒', '🐦'][Math.floor(Math.random()*4)];
+        const div = document.createElement('div');
+        div.style.position = 'absolute'; div.style.fontSize = '50px';
+        div.innerText = f;
+        div.style.left = Math.random() * (window.innerWidth - 60) + 'px';
+        div.style.top = (parseInt(rabbit.style.top) + 100) + 'px';
+        document.body.appendChild(div);
+
         const m = document.createElement('div');
-        m.style.position = 'absolute'; m.style.top = '-30px'; m.style.width = '120px';
-        m.style.fontSize = '18px'; m.style.fontWeight = 'bold'; m.style.color = 'white';
+        m.style.position = 'absolute'; m.style.top = '-30px'; m.style.width = '150px';
+        m.style.fontSize = '20px'; m.style.fontWeight = 'bold'; m.style.color = 'white';
         m.style.textShadow = '2px 2px 4px black';
-        m.innerText = "아인아 힘내! 👍";
-        f.appendChild(m);
-        setTimeout(() => f.remove(), 3000);
+        m.innerText = "정아인 힘내! 👍";
+        div.appendChild(m);
+        setTimeout(() => div.remove(), 3000);
     }
 
     function endGame(win, msg="") {
         clearInterval(timer);
         quizBox.style.display = 'none';
         monster.style.display = 'none';
-        const screen = document.getElementById('result-screen');
-        screen.style.display = 'block';
         
+        const screen = document.getElementById('result-screen');
         const stats = document.getElementById('res-stats');
         const reward = document.getElementById('res-reward');
-        
-        if(win) {
-            stats.innerText = `대단해 정아인!\n20문제를 모두 맞혔어!\n점수: 100점 💯`;
-            reward.innerText = "🎟️ 소원권 획득!";
-            for(let i=0; i<40; i++) {
-                setTimeout(() => {
-                    const s = document.createElement('div');
-                    s.className = 'star'; s.innerText = '⭐';
-                    s.style.left = Math.random() * 100 + 'vw'; s.style.top = '-50px';
-                    document.body.appendChild(s);
-                }, i * 100);
-            }
+        screen.style.display = 'block';
+
+        if (win) {
+            stats.innerText = `와! 정아인 어린이 최고!\n20문제를 모두 맞혔어요!\n점수: 100점 💯`;
+            reward.innerText = "🎟️ 소원권";
+            startStarRain();
         } else {
-            rabbit.style.opacity = '0';
-            stats.innerText = `${msg}\n맞힌 문제: ${score}개\n점수: ${(score/total)*100}점`;
+            rabbit.style.opacity = '0'; // 마법으로 사라짐
+            stats.innerText = `${msg}\n맞힌 문제: ${score}개\n점수: ${Math.floor((score/totalQuestions)*100)}점`;
+            reward.innerText = "앗!";
         }
     }
 
-    initStairs();
-    move();
-    setTimeout(next, 1500);
+    function startStarRain() {
+        for(let i=0; i<40; i++) {
+            setTimeout(() => {
+                const s = document.createElement('div');
+                s.className = 'star-rain'; s.innerText = '⭐';
+                s.style.left = Math.random() * 100 + 'vw';
+                s.style.top = '-50px';
+                document.body.appendChild(s);
+            }, i * 150);
+        }
+    }
+
+    buildStairs();
+    updatePosition();
+    setTimeout(startLevel, 1500);
 </script>
 </body>
 </html>
