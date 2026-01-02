@@ -93,13 +93,11 @@
         #remain-info { font-size: 24px; color: #666; font-weight: bold; margin-bottom: 2px; }
         #timer { font-size: 24px; color: #ff5252; font-weight: bold; margin-bottom: 2px; }
         
-        /* 1. 문제 숫자 크기 40% 확대 (24px -> 약 34px) */
         #question { font-size: 34px; margin: 2px 0; color: #2e7d32; font-weight: 900; }
         
-        /* 1. 문제 숫자와 숫자 키보드 사이 세로 여백 50% 축소 (기존 answer-display 높이 조정) */
-        #answer-display { font-size: 24px; height: 15px; margin-bottom: 2px; line-height: 15px; font-weight: bold; color: #1b5e20; }
+        /* 세로 여백 조정을 위해 answer-display는 아주 얇게 유지 */
+        #answer-display { font-size: 2px; height: 5px; margin-bottom: 2px; visibility: hidden; }
         
-        /* 1. 숫자 키보드 안 숫자 볼드 처리 및 레이아웃 */
         #numpad { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-bottom: 5px; }
         .num-btn { 
             font-size: 22px; 
@@ -110,7 +108,7 @@
             cursor: pointer; 
             color: #2e7d32; 
             box-shadow: 0 2px 0 #66bb6a;
-            font-weight: 800 !important; /* 볼드 처리 */
+            font-weight: 800 !important;
         }
         
         #numpad-control { display: flex; gap: 8px; }
@@ -155,8 +153,7 @@
             <div id="remain-info"></div>
             <div id="timer">🕒 15</div>
             <div id="question"></div>
-            <div id="answer-display"></div>
-            <div id="numpad">
+            <div id="answer-display"></div> <div id="numpad">
                 <button class="num-btn" onclick="addNum(1)">1</button>
                 <button class="num-btn" onclick="addNum(2)">2</button>
                 <button class="num-btn" onclick="addNum(3)">3</button>
@@ -194,7 +191,6 @@
     const questionEl = document.getElementById('question');
     const timerEl = document.getElementById('timer');
     const remainEl = document.getElementById('remain-info');
-    const answerDisplay = document.getElementById('answer-display');
     const startScreen = document.getElementById('start-screen');
 
     let currentLvl = 0;
@@ -204,6 +200,7 @@
     let correctVal = 0;
     let inputVal = "";
     let gameStep = 1;
+    let currentQuizStr = ""; // 현재 문제 문자열 저장용
     const totalQuest = 15;
 
     const cheerMessages = ["잘한다!", "힘내!", "멋져요!", "좋아!", "최고!", "화이팅!"];
@@ -275,13 +272,23 @@
                 const h4 = Math.floor(Math.random() * (h3 - 1)) + 1; const t4 = Math.floor(Math.random() * (t3 + 1)); const o4 = Math.floor(Math.random() * (o3 + 1));
                 a = h3 * 100 + t3 * 10 + o3; b = h4 * 100 + t4 * 10 + o4; op = "-"; correctVal = a - b; break;
         }
-        questionEl.innerText = `${a} ${op} ${b} = ?`;
+        currentQuizStr = `${a} ${op} ${b} = `;
+        questionEl.innerText = currentQuizStr + "?";
         remainEl.innerText = `남은 문제: ${totalQuest - currentLvl}개`;
         clearAns();
     }
 
-    function addNum(n) { if(inputVal.length < 4) { inputVal += n; answerDisplay.innerText = inputVal; } }
-    function clearAns() { inputVal = ""; answerDisplay.innerText = ""; }
+    function addNum(n) { 
+        if(inputVal.length < 4) { 
+            inputVal += n; 
+            questionEl.innerText = currentQuizStr + inputVal; // 문제 텍스트의 ? 부분을 입력 숫자로 교체
+        } 
+    }
+
+    function clearAns() { 
+        inputVal = ""; 
+        questionEl.innerText = currentQuizStr + "?"; // 다시 ?로 복구
+    }
 
     function startTurn() {
         if (currentLvl >= totalQuest) { endGame(true); return; }
