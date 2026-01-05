@@ -36,6 +36,8 @@
             position: absolute; width: 100%; height: 100%; z-index: 500;
             background: rgba(255, 255, 255, 0.95); display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
+        /* 애니메이션 복원: start-rabbit에 bounce 애니메이션 적용 */
+        .start-rabbit { font-size: 80px; margin-bottom: 10px; animation: bounce 2s infinite; }
         .game-title { font-size: 34px; color: #2e7d32; font-weight: 800; margin-bottom: 30px; text-align: center; }
         .btn-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; width: 90%; }
         .step-btn {
@@ -95,7 +97,6 @@
             z-index: 600; display: none !important; width: 100%; justify-content: center; 
         }
 
-        /* 축하 그래픽 연출용 스타일 */
         #victory-effect {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 550; display: none; pointer-events: none;
@@ -107,6 +108,9 @@
             50% { opacity: 1; transform: scale(1.2); background-color: rgba(255, 255, 255, 0.4); }
             100% { opacity: 0; transform: scale(1.5); }
         }
+
+        /* 통통 튀는 애니메이션 정의 */
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
     </style>
 </head>
 <body>
@@ -115,7 +119,7 @@
     <div id="victory-effect"></div>
 
     <div id="start-screen">
-        <div style="font-size: 60px;">🐰</div>
+        <div class="start-rabbit">🐰</div>
         <div class="game-title">아이니의<br>하늘나무 수학교실</div>
         <div class="btn-grid">
             <button class="step-btn" onclick="startGame(1)">1단계<br>(두자리 받아올림)</button>
@@ -273,18 +277,12 @@
         }, 800);
     }
 
-    // 성공 시 그래픽 연출 로직
     function showVictoryEffect() {
         const effect = document.getElementById('victory-effect');
         effect.style.display = 'block';
-        
-        // 하늘 끝까지 올라가는 카메라 연출
         const finalY = (totalQuest * 80) - (window.innerHeight * 0.5);
         document.getElementById('game-world').style.transform = `translateY(${finalY + 200}px) scale(1.1)`;
-
-        setTimeout(() => {
-            endGame(true);
-        }, 2500); // 효과가 진행된 후 팝업 출력
+        setTimeout(() => { endGame(true); }, 2500);
     }
 
     function startTimer() {
@@ -317,11 +315,9 @@
         const screen = document.getElementById('stats-screen');
         screen.style.setProperty('display', 'flex', 'important');
         const steps = ["", "1단계(두자리 받아올림)", "2단계(세자리 받아올림)", "3단계(두자리 받아내림)", "4단계(세자리 받아내림)"];
-        
         document.getElementById('stats-step-info').innerText = win ? steps[gameStep] : "";
         document.getElementById('stats-title').innerText = win ? "대성공! 🎉" : "아쉬워요";
         document.getElementById('stats-content').innerText = `${totalQuest}문제 중 ${score}문제를 맞혔어요!`;
-        
         if (win) {
             document.getElementById('wish-ticket').style.display = 'block';
         } else {
