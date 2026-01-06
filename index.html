@@ -36,7 +36,7 @@
             position: absolute; width: 100%; height: 100%; z-index: 500;
             background: rgba(255, 255, 255, 0.95); display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
-        .start-rabbit { font-size: 80px; margin-bottom: 10px; animation: bounce 2s infinite; }
+        .start-rabbit { width: 120px; height: 120px; margin-bottom: 10px; animation: bounce 2s infinite; background: url('abc.png') no-repeat center/contain; }
         .game-title { font-size: 34px; color: #2e7d32; font-weight: 800; margin-bottom: 30px; text-align: center; }
         .btn-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; width: 90%; }
         .step-btn {
@@ -64,13 +64,13 @@
         .stair::before { left: 8px; }
         .stair::after { right: 8px; }
 
-        #rabbit-group { position: absolute; z-index: 20; transition: all 0.7s ease-in-out; left: 50%; transform: translateX(-50%); }
-        #rabbit { font-size: 60px; text-align: center; }
+        #rabbit-group { position: absolute; z-index: 20; transition: all 0.7s ease-in-out; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; }
+        #rabbit { width: 100px; height: 100px; background: url('abc.png') no-repeat center/contain; }
 
         #rabbit-bubble {
             position: absolute; background: #fff; border: 3px solid #ff80ab; padding: 5px 10px;
             border-radius: 15px; font-size: 16px; font-weight: 800; color: #d81b60;
-            white-space: nowrap; display: none; bottom: 75px; left: 50%; transform: translateX(-50%);
+            white-space: nowrap; display: none; bottom: 105px; left: 50%; transform: translateX(-50%);
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
         #rabbit-bubble::after {
@@ -96,6 +96,32 @@
             z-index: 600; display: none !important; width: 100%; justify-content: center; 
         }
 
+        /* 2. 업그레이드된 소원권 디자인 */
+        #wish-ticket {
+            display: none;
+            background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+            color: #fff;
+            padding: 15px;
+            border-radius: 20px;
+            border: 4px dashed #fff;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+            margin: 15px 0;
+            position: relative;
+            animation: shine 1.5s infinite;
+        }
+        #wish-ticket span {
+            display: block;
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: 1px; /* 가로 간격 최적화 */
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        @keyframes shine {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
         #victory-effect {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 550; display: none; pointer-events: none;
@@ -117,7 +143,7 @@
     <div id="victory-effect"></div>
 
     <div id="start-screen">
-        <div class="start-rabbit">🐰</div>
+        <div class="start-rabbit"></div>
         <div class="game-title">아이니의<br>하늘나무 수학교실</div>
         <div class="btn-grid">
             <button class="step-btn" onclick="startGame(1)">1단계<br>(두자리 받아올림)</button>
@@ -131,7 +157,7 @@
         <div id="stair-container"></div>
         <div id="rabbit-group">
             <div id="rabbit-bubble"></div>
-            <div id="rabbit">🐰</div>
+            <div id="rabbit"></div>
         </div>
     </div>
 
@@ -164,17 +190,21 @@
             <h1 id="stats-title" style="color: #f57c00; font-size: 22px; margin-bottom: 5px;"></h1>
             <div id="stats-step-info" style="font-size: 15px; color: #666; margin-bottom: 10px;"></div>
             <p id="stats-content" style="font-weight: bold; font-size: 18px; line-height: 1.6;"></p>
-            <div id="wish-ticket" style="display:none; color: #d81b60; font-size: 20px; font-weight: bold; margin: 10px 0;">🎟️ 소원권 획득! 🎟️</div>
-            <div style="font-size: 50px; margin: 10px;">🐰</div>
+            
+            <div id="wish-ticket">
+                <span>⭐ 축하해! ⭐</span>
+                <span>🎟️ 소원권 획득! 🎟️</span>
+            </div>
+
+            <div style="width: 80px; height: 80px; margin: 10px auto; background: url('abc.png') no-repeat center/contain;"></div>
             <button onclick="location.reload()" style="padding: 12px 25px; background: #ffa726; color: #fff; border: none; border-radius: 20px; cursor: pointer; font-size: 18px; font-weight: bold;">다시하기</button>
         </div>
     </div>
 </div>
 
 <script>
-    const audioCorrect = new Audio('https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3'); 
+    // 1. 소리 관련: audioCorrect는 삭제하고 audioStep과 audioWin만 유지
     const audioWin = new Audio('https://assets.mixkit.co/active_storage/sfx/1432/1432-preview.mp3');
-    // 계단용 효과음 한 개만 유지
     const audioStep = new Audio('https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3');
 
     let currentLvl = 0;
@@ -272,7 +302,8 @@
         if (currentLvl >= totalQuest) { showVictoryEffect(); return; }
         currentLvl++;
         
-        // 중복 방지: 계단 효과음 재생 (audioCorrect는 정답 체크에서만 재생됨)
+        // 1. 오직 한 개의 짧은 효과음만 재생
+        audioStep.currentTime = 0;
         audioStep.play();
         
         updateRabbitPosition();
@@ -312,7 +343,7 @@
         if (inputVal === "" || parseInt(inputVal) !== correctVal) { endGame(false, "틀렸어요!"); return; }
         clearInterval(timer);
         score++;
-        audioCorrect.play();
+        // 1. 정답 시 별도 소리 내지 않고 다음 턴의 audioStep으로 통합하여 1개만 나도록 함
         document.getElementById('quiz-box').style.display = 'none';
         setTimeout(startTurn, 300);
     }
