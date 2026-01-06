@@ -145,10 +145,10 @@
         <div class="start-rabbit"></div>
         <div class="game-title">아이니의<br>하늘나무 수학교실</div>
         <div class="btn-grid">
-            <button class="step-btn" onclick="playMusic(); startGame(1)">1단계<br>(두자리 받아올림)</button>
-            <button class="step-btn" onclick="playMusic(); startGame(2)">2단계<br>(세자리 받아올림)</button>
-            <button class="step-btn" onclick="playMusic(); startGame(3)">3단계<br>(두자리 받아내림)</button>
-            <button class="step-btn" onclick="playMusic(); startGame(4)">4단계<br>(세자리 받아내림)</button>
+            <button class="step-btn" onclick="startGame(1)">1단계<br>(두자리 받아올림)</button>
+            <button class="step-btn" onclick="startGame(2)">2단계<br>(세자리 받아올림)</button>
+            <button class="step-btn" onclick="startGame(3)">3단계<br>(두자리 받아내림)</button>
+            <button class="step-btn" onclick="startGame(4)">4단계<br>(세자리 받아내림)</button>
         </div>
     </div>
 
@@ -202,23 +202,8 @@
 </div>
 
 <script>
-    // 오디오 설정
     const audioWin = new Audio('https://assets.mixkit.co/active_storage/sfx/1432/1432-preview.mp3');
-    const bgMusic = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-17.mp3'); // 더 안정적인 주소로 교체
-    bgMusic.loop = true;
-    bgMusic.volume = 0.3;
-
     let audioCtx = null;
-    let isMusicPlaying = false;
-
-    // 배경음악 강제 재생 함수
-    function playMusic() {
-        if (!isMusicPlaying) {
-            bgMusic.play().then(() => {
-                isMusicPlaying = true;
-            }).catch(e => console.log("음악 재생 대기 중..."));
-        }
-    }
 
     function playCuteSound() {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -339,9 +324,7 @@
     function startTurn() {
         if (currentLvl >= totalQuest) { showVictoryEffect(); return; }
         currentLvl++;
-        
         playCuteSound();
-        
         updateRabbitPosition();
         setTimeout(() => {
             showSpeech();
