@@ -96,7 +96,6 @@
             z-index: 600; display: none !important; width: 100%; justify-content: center; 
         }
 
-        /* 2. 업그레이드된 소원권 디자인 */
         #wish-ticket {
             display: none;
             background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
@@ -113,7 +112,7 @@
             display: block;
             font-size: 22px;
             font-weight: 900;
-            letter-spacing: 1px; /* 가로 간격 최적화 */
+            letter-spacing: 1px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
         @keyframes shine {
@@ -146,10 +145,10 @@
         <div class="start-rabbit"></div>
         <div class="game-title">아이니의<br>하늘나무 수학교실</div>
         <div class="btn-grid">
-            <button class="step-btn" onclick="startGame(1)">1단계<br>(두자리 받아올림)</button>
-            <button class="step-btn" onclick="startGame(2)">2단계<br>(세자리 받아올림)</button>
-            <button class="step-btn" onclick="startGame(3)">3단계<br>(두자리 받아내림)</button>
-            <button class="step-btn" onclick="startGame(4)">4단계<br>(세자리 받아내림)</button>
+            <button class="step-btn" onclick="playMusic(); startGame(1)">1단계<br>(두자리 받아올림)</button>
+            <button class="step-btn" onclick="playMusic(); startGame(2)">2단계<br>(세자리 받아올림)</button>
+            <button class="step-btn" onclick="playMusic(); startGame(3)">3단계<br>(두자리 받아내림)</button>
+            <button class="step-btn" onclick="playMusic(); startGame(4)">4단계<br>(세자리 받아내림)</button>
         </div>
     </div>
 
@@ -203,9 +202,44 @@
 </div>
 
 <script>
-    // 1. 소리 관련: audioCorrect는 삭제하고 audioStep과 audioWin만 유지
+    // 오디오 설정
     const audioWin = new Audio('https://assets.mixkit.co/active_storage/sfx/1432/1432-preview.mp3');
-    const audioStep = new Audio('https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3');
+    const bgMusic = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-17.mp3'); // 더 안정적인 주소로 교체
+    bgMusic.loop = true;
+    bgMusic.volume = 0.3;
+
+    let audioCtx = null;
+    let isMusicPlaying = false;
+
+    // 배경음악 강제 재생 함수
+    function playMusic() {
+        if (!isMusicPlaying) {
+            bgMusic.play().then(() => {
+                isMusicPlaying = true;
+            }).catch(e => console.log("음악 재생 대기 중..."));
+        }
+    }
+
+    function playCuteSound() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(1000, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1500, audioCtx.currentTime + 0.15);
+        
+        gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.15);
+    }
 
     let currentLvl = 0;
     let score = 0;
@@ -219,9 +253,13 @@
     const cheerMessages = ["좋아!좋아!", "잘한다!", "화이팅!", "힘내!", "소원권 가자!", "멋지다!", "조금만 더!", "집중!집중!"];
 
     function startGame(step) {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        
         gameStep = step;
         document.getElementById('start-screen').style.display = 'none';
         document.getElementById('stats-screen').style.setProperty('display', 'none', 'important');
+        
         initStairs();
         updateRabbitPosition();
         setTimeout(startTurn, 500);
@@ -302,9 +340,7 @@
         if (currentLvl >= totalQuest) { showVictoryEffect(); return; }
         currentLvl++;
         
-        // 1. 오직 한 개의 짧은 효과음만 재생
-        audioStep.currentTime = 0;
-        audioStep.play();
+        playCuteSound();
         
         updateRabbitPosition();
         setTimeout(() => {
@@ -343,7 +379,6 @@
         if (inputVal === "" || parseInt(inputVal) !== correctVal) { endGame(false, "틀렸어요!"); return; }
         clearInterval(timer);
         score++;
-        // 1. 정답 시 별도 소리 내지 않고 다음 턴의 audioStep으로 통합하여 1개만 나도록 함
         document.getElementById('quiz-box').style.display = 'none';
         setTimeout(startTurn, 300);
     }
